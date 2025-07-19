@@ -1,0 +1,41 @@
+---
+name: Convert YAML file to JSON string
+on:
+  workflow_call:
+    inputs:
+      path:
+        required: false
+        type: string
+    outputs:
+      result:
+        description: |
+          The parsed JSON as string. Use fromJson() in steps or jobs
+        value: ${{ jobs.perform.outputs.json }}
+
+jobs:
+  perform:
+    runs-on: ubuntu-latest
+    outputs:
+      json: ${{ steps.result.outputs.result }}
+    steps:
+      - name: Install requirements
+        run: |
+          sudo snap install yq
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse YAML file
+        run: |
+          yq -o json "${{ inputs.path }}"
+          echo "JSON<<EOF" >> $GITHUB_ENV
+          yq -o json "${{ inputs.path }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Parse the JSON
+        id: result
+        run: |
+          echo '${{ env.JSON }}'
+          result=`echo '${{ env.JSON }}' | tr -d '\n'`
+          echo result=${result} >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
