@@ -14,7 +14,11 @@ jobs:
       matrix:
         idf_ver: ["v5.3"]
     runs-on: ubuntu-latest
-    container: espressif/idf:${{ matrix.idf_ver }}
+    container:
+      image: espressif/idf:${{ matrix.idf_ver }}
+      env:
+        IDF_CLONE_SHALLOW: 1
+        IDF_CLONE_SHALLOW_DEPTH: 1
     steps:
       - uses: actions/checkout@v3
         with:
@@ -23,7 +27,8 @@ jobs:
       - name: source export.sh
         run: |
           . ${IDF_PATH}/export.sh
-          env | grep -e '^IDF_' >> ${GITHUB_ENV}
+          env | grep 'IDF_' >> ${GITHUB_ENV}
+
       - name: Build examples
         shell: bash
         run: |
