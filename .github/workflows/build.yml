@@ -47,7 +47,7 @@ jobs:
       - name: Skip if the target is ESP8266
         if: ${{ matrix.target == 'esp8266' }}
         run: |
-          run: echo "status=skip" >> $GITHUB_OUTPUT
+          echo "status=skip" >> $GITHUB_OUTPUT
 
       - name: Install esp-idf
         uses: espressif/install-esp-idf-action@v1
