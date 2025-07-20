@@ -26,14 +26,7 @@ jobs:
         id: find-examples
         run: |
           EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
-          RESULT="["
-          for example in ${EXAMPLES}; do
-            RESULT="${RESULT}, \"${EXAMPLE}\""
-          done
-          RESULT="${RESULT}]"
-
-          echo "result=${RESULT}" >> ${GITHUB_OUTPUT}
-          cat ${GITHUB_OUTPUT}
+          ruby -e "require 'json'; puts \"result=#{ARGV.to_json}\"" ${EXAMPLES} >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
