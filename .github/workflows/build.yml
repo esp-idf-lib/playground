@@ -38,7 +38,6 @@ jobs:
 
     steps:
       - name: source export.sh
-        if: ${{ env.SKIP != 'yes' }}
         run: |
           . ${IDF_PATH}/export.sh
           env | grep "IDF_" >> ${GITHUB_ENV}
@@ -64,5 +63,5 @@ jobs:
         run: |
           EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
           for EXAMPLE in ${EXAMPLES}; do
-            cd "${EXAMPLE}" && idf.py build
+            (cd "${EXAMPLE}" && idf.py build)
           done
