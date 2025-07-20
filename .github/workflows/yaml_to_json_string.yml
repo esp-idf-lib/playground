@@ -18,24 +18,11 @@ jobs:
     outputs:
       json: ${{ steps.result.outputs.result }}
     steps:
-      - name: Install requirements
-        run: |
-          sudo apt-get install yq
-
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Parse YAML file
-        run: |
-          yq -o json "${{ inputs.path }}"
-          echo "JSON<<EOF" >> $GITHUB_ENV
-          yq -o json "${{ inputs.path }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Parse the JSON
+      - name: Parse YAML
         id: result
         run: |
-          echo '${{ env.JSON }}'
-          result=`echo '${{ env.JSON }}' | tr -d '\n'`
-          echo result=${result} >> $GITHUB_OUTPUT
+          echo result=`ruby -e "require 'yaml'; require 'json'; YAML.safe_load(File.read('${{ path }}')).to_json"` >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
