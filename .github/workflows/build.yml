@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        examples: ${{ fromJSON(needs.find_examples.outputs.result) }}
+        example: ${{ fromJSON(needs.find_examples.outputs.result) }}
         target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
         esp_idf_version:
           - v5.1
