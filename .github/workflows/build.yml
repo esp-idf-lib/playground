@@ -26,7 +26,8 @@ jobs:
         id: find-examples
         run: |
           EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
-          ruby -e "require 'json'; puts \"result=#{ARGV.to_json}\"" ${EXAMPLES} >> $GITHUB_OUTPUT
+          # ruby -e "require 'json'; puts \"result=#{ARGV.to_json}\"" ${EXAMPLES} >> $GITHUB_OUTPUT
+          echo "#{EXAMPLES}" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
@@ -36,21 +37,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: ${{ fromJSON(needs.find_examples.outputs.result) }}
         target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
-        esp_idf_version:
+        esp-idf-version:
           - v5.1
           - v5.2
           - v5.3
           - v5.4
     steps:
+      - name: Skip if the target is ESP8266
+        if: ${{ matrix.target == 'esp8266' }}
+        run: |
+          run: echo "status=skip" >> $GITHUB_OUTPUT
+
+      - name: Install esp-idf
+        uses: espressif/install-esp-idf-action@v1
+        with:
+          version: ${{ matrix.esp-idf-version }}
+
+      - name: Skip if the target is not supported by the esp-idf-version
+        run: |
+          if echo `idf.py --list-targets` | grep ${{ matrix.target }}; then
+            echo "${{ matrix.target }} is supported by esp-idf version ${{ matrix.version }}"
+          else
+            echo "${{ matrix.target }} is NOT supported by esp-idf version ${{ matrix.version }}"
+            echo "status=skip" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: esp-idf build
-        if: ${{ matrix.target != 'esp8266' }}
-        uses: espressif/esp-idf-ci-action@v1
-        with:
-          esp_idf_version: ${{ matrix.esp_idf_version }}
-          target: ${{ matrix.target }}
-          path: ${{ matrix.example }}
+      - name: Build examples
+        run: |
+          for EXAMPLE in ${{ needs.find_examples.outputs.result }}; do
+            (cd ${EXAMPLE} && idf.py set-target ${{ matrix.target }} && idf.pdfy build)
+          done
