@@ -43,9 +43,9 @@ jobs:
           - v5.2
           - v5.3
           - v5.4
+    if: matrix.target != 'esp8266'
     steps:
       - name: Skip if the target is ESP8266
-        if: ${{ matrix.target == 'esp8266' }}
         run: |
           exit 0
 
@@ -58,7 +58,10 @@ jobs:
         with:
           version: ${{ matrix.esp-idf-version }}
 
-      - name: Skip if the target is not supported by the esp-idf-version
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Build examples
         run: |
           if echo `idf.py --list-targets` | grep ${{ matrix.target }}; then
             echo "${{ matrix.target }} is supported by esp-idf version ${{ matrix.version }}"
@@ -66,12 +69,7 @@ jobs:
             echo "${{ matrix.target }} is NOT supported by esp-idf version ${{ matrix.version }}"
             exit 0
           fi
-
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Build examples
-        run: |
           for EXAMPLE in ${{ needs.find_examples.outputs.result }}; do
-            (cd ${EXAMPLE} && idf.py set-target ${{ matrix.target }} && idf.pdfy build)
+            idf.py set-target ${{ matrix.target }} -C "${EXAMPLE}"
+            idf.py build -C ${EXAMPLE}
           done
