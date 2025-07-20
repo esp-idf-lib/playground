@@ -25,7 +25,7 @@ jobs:
       - name: Find examples
         id: find-examples
         run: |
-          EXAMPLES=`echo find examples -type d -maxdepth 1 -mindepth 1`
+          EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
           echo "result=${EXAMPLES}" >> ${GITHUB_OUTPUT}
           cat ${GITHUB_OUTPUT}
 
