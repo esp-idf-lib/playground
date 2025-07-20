@@ -9,28 +9,59 @@ on:
       - reopened
       - synchronize
 jobs:
+  yaml_to_json_string:
+    uses: ./.github/workflows/yaml_to_json_string.yml
+    with:
+      path: .eil.yml
+
   build:
-    strategy:
-      matrix:
-        idf_ver: ["v5.3"]
     runs-on: ubuntu-latest
+    needs:
+      - yaml_to_json_string
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
+        esp-idf-version:
+          - v5.1
+          - v5.2
+          - v5.3
+          - v5.4
+          - latest
+
     container:
-      image: espressif/idf:${{ matrix.idf_ver }}
+      image: espressif/idf:${{ matrix.esp-idf-version }}
       env:
         IDF_CLONE_SHALLOW: 1
         IDF_CLONE_SHALLOW_DEPTH: 1
+
     steps:
+      - name: Skip build if target is not supported
+        run: |
+          if idf.py --list-targets | grep -q "esp32"; then
+            echo "target ${{ matrix.target }} is supported"
+          else
+            echo "target ${{ matrix.target }} is NOT supported"
+            echo SKIP=yes >> "${GITHUB_ENV}"
+          fi
       - uses: actions/checkout@v3
+        if: ${{ env.SKIP != 'yes' }}
         with:
           submodules: recursive
 
       - name: source export.sh
+        if: ${{ env.SKIP != 'yes' }}
         run: |
           . ${IDF_PATH}/export.sh
           env | grep "IDF_" >> ${GITHUB_ENV}
           echo "PATH=${PATH}" >> ${GITHUB_ENV}
 
       - name: Build examples
+        if: ${{ env.SKIP != 'yes' }}
         shell: bash
         run: |
-          cd examples/hello_world && idf.py build
+          EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
+          for EXAMPLE in ${EXAMPLES}; do
+            cd "${EXAMPLE}" && idf.py build
+          done
