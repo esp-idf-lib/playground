@@ -17,7 +17,7 @@ jobs:
   find_examples:
     runs-on: ubuntu-latest
     outputs:
-      result: ${{ steps.find_examples.outputs.result }}
+      result: ${{ steps.find-examples.outputs.result }}
     steps:
       - name: Check out
         uses: actions/checkout@v4
