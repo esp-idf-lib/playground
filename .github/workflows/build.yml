@@ -26,7 +26,13 @@ jobs:
         id: find-examples
         run: |
           EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
-          echo "result=${EXAMPLES}" >> ${GITHUB_OUTPUT}
+          RESULT="["
+          for example in ${EXAMPLES}; do
+            RESULT="${RESULT}, \"${EXAMPLE}\""
+          done
+          RESULT="${RESULT}]"
+
+          echo "result=${RESULT}" >> ${GITHUB_OUTPUT}
           cat ${GITHUB_OUTPUT}
 
   build:
@@ -37,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        examples: ${{ needs.find_examples.outputs.result }}
+        examples: ${{ fromJSON(needs.find_examples.outputs.result) }}
         target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
         esp_idf_version:
           - v5.1
