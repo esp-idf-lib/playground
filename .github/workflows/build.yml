@@ -43,25 +43,24 @@ jobs:
           - v5.2
           - v5.3
           - v5.4
-    if: matrix.target != 'esp8266'
     steps:
-      - name: Skip if the target is ESP8266
-        run: |
-          exit 0
-
       - name: Install missing packages
+        if: matrix.target != 'esp8266'
         run: |
           sudo apt-get install libsdl2-dev
 
       - name: Install esp-idf
+        if: matrix.target != 'esp8266'
         uses: espressif/install-esp-idf-action@v1
         with:
           version: ${{ matrix.esp-idf-version }}
 
       - name: Check out
+        if: matrix.target != 'esp8266'
         uses: actions/checkout@v4
 
       - name: Build examples
+        if: matrix.target != 'esp8266'
         run: |
           if echo `idf.py --list-targets` | grep ${{ matrix.target }}; then
             echo "${{ matrix.target }} is supported by esp-idf version ${{ matrix.version }}"
