@@ -11,14 +11,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      steps:
-        - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-        - name: Install ESP-IDF
-          uses: espressif/install-esp-idf-action@v1
+      - name: Install ESP-IDF
+        uses: espressif/install-esp-idf-action@v1
 
-        - name: Build your project
-          run: |
-            idf.py --version
+      - name: Build your project
+        run: |
+          idf.py --version
