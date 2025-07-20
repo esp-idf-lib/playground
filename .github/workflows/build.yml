@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: esp-idf build
-        if: ${{ target != 'esp8266' }}
+        if: ${{ matrix.target != 'esp8266' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: ${{ matrix.esp_idf_version }}
