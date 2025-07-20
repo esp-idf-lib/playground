@@ -14,12 +14,29 @@ jobs:
     with:
       path: .eil.yml
 
+  find_examples:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.find_examples.outputs.result }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Find examples
+        id: find-examples
+        run: |
+          EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1`
+          echo "result=${EXAMPLES}" >> ${GITHUB_OUTPUT}
+
   build:
     runs-on: ubuntu-latest
-    needs: yaml_to_json_string
+    needs:
+      - yaml_to_json_string
+      - find_examples
     strategy:
       fail-fast: false
       matrix:
+        examples: ${{ needs.find_examples.outputs.result }}
         target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
         esp_idf_version:
           - v5.1
@@ -30,14 +47,9 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-
-      - name: Find examples
-        run: |
-          EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1` >> $GITHUB_ENV
-
       - name: esp-idf build
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: ${{ matrix.esp_idf_version }}
           target: ${{ matrix.target }}
-          path: ${{ env.EXAMPLES }}
+          path: ${{ matrix.example }}
