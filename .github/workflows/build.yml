@@ -10,17 +10,18 @@ on:
       - synchronize
 jobs:
   build:
+    strategy:
+      matrix:
+        idf_ver: ["v5.3"]
     runs-on: ubuntu-latest
+    container: espressif/idf:${{ matrix.idf_ver }}
     steps:
-      - name: Install missing packages
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build examples
+        shell: bash
         run: |
-          sudo apt-get install libsdl2-dev
-
-      - uses: actions/checkout@v4
-
-      - name: Install ESP-IDF
-        uses: espressif/install-esp-idf-action@v1
-
-      - name: Build your project
-        run: |
-          idf.py --version
+          . ${IDF_PATH}/export.sh
+          pip install idf-component-manager ruamel.yaml idf-build-apps --upgrade
+          cd examples/hello_world && idf.py build
