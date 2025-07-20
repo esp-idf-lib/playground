@@ -62,6 +62,8 @@ jobs:
       - name: Build examples
         if: matrix.target != 'esp8266'
         run: |
+          idf.py --version
+          idf_tools.py install-python-env
           if echo `idf.py --list-targets` | grep ${{ matrix.target }}; then
             echo "${{ matrix.target }} is supported by esp-idf version ${{ matrix.version }}"
           else
