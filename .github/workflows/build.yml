@@ -27,6 +27,7 @@ jobs:
         run: |
           EXAMPLES=`echo find examples -type d -maxdepth 1 -mindepth 1`
           echo "result=${EXAMPLES}" >> ${GITHUB_OUTPUT}
+          cat ${GITHUB_OUTPUT}
 
   build:
     runs-on: ubuntu-latest
