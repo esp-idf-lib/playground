@@ -49,6 +49,10 @@ jobs:
         run: |
           echo "status=skip" >> $GITHUB_OUTPUT
 
+      - name: Install missing packages
+        run: |
+          sudo apt-get install libsdl2-dev
+
       - name: Install esp-idf
         uses: espressif/install-esp-idf-action@v1
         with:
