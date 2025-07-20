@@ -45,7 +45,7 @@ jobs:
 
       - name: Skip build if target is not supported
         run: |
-          if idf.py --list-targets | grep -q "esp32"; then
+          if idf.py --list-targets | grep -q "${{ matrix.target }}"; then
             echo "target ${{ matrix.target }} is supported"
           else
             echo "target ${{ matrix.target }} is NOT supported"
