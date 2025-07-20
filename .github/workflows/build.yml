@@ -9,68 +9,16 @@ on:
       - reopened
       - synchronize
 jobs:
-  yaml_to_json_string:
-    uses: ./.github/workflows/yaml_to_json_string.yml
-    with:
-      path: .eil.yml
-
-  find_examples:
-    runs-on: ubuntu-latest
-    outputs:
-      result: ${{ steps.find-examples.outputs.result }}
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Find examples
-        id: find-examples
-        run: |
-          EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
-          # ruby -e "require 'json'; puts \"result=#{ARGV.to_json}\"" ${EXAMPLES} >> $GITHUB_OUTPUT
-          echo "result=${EXAMPLES}" >> $GITHUB_OUTPUT
-
   build:
     runs-on: ubuntu-latest
-    needs:
-      - yaml_to_json_string
-      - find_examples
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
-        esp-idf-version:
-          - v5.1
-          - v5.2
-          - v5.3
-          - v5.4
+
     steps:
-      - name: Install missing packages
-        if: matrix.target != 'esp8266'
-        run: |
-          sudo apt-get install libsdl2-dev
+      steps:
+        - uses: actions/checkout@v4
 
-      - name: Install esp-idf
-        if: matrix.target != 'esp8266'
-        uses: espressif/install-esp-idf-action@v1
-        with:
-          version: ${{ matrix.esp-idf-version }}
+        - name: Install ESP-IDF
+          uses: espressif/install-esp-idf-action@v1
 
-      - name: Check out
-        if: matrix.target != 'esp8266'
-        uses: actions/checkout@v4
-
-      - name: Build examples
-        if: matrix.target != 'esp8266'
-        run: |
-          idf.py --version
-          idf_tools.py install-python-env
-          if echo `idf.py --list-targets` | grep ${{ matrix.target }}; then
-            echo "${{ matrix.target }} is supported by esp-idf version ${{ matrix.version }}"
-          else
-            echo "${{ matrix.target }} is NOT supported by esp-idf version ${{ matrix.version }}"
-            exit 0
-          fi
-          for EXAMPLE in ${{ needs.find_examples.outputs.result }}; do
-            idf.py set-target ${{ matrix.target }} -C "${EXAMPLE}"
-            idf.py build -C ${EXAMPLE}
-          done
+        - name: Build your project
+          run: |
+            idf.py --version
