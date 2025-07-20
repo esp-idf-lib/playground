@@ -18,6 +18,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Parse .eil.yml
+        # parse .eil.yml and retun a JSON string so that value `targets` can
+        # be used in matrix later.
+        #
+        # `result` is a JSON string. esp8266 is rejected because the build
+        # job does not support esp8266.
         id: parse-eil
         run: |
           echo result=`ruby -e "require 'yaml'; require 'json'; doc = YAML.safe_load(File.read('.eil.yml')); doc['targets'] = doc['targets'].reject { |e| e == 'esp8266' }; puts doc.to_json"` >> $GITHUB_OUTPUT
@@ -53,6 +58,11 @@ jobs:
           echo "PATH=${PATH}" >> ${GITHUB_ENV}
 
       - name: Skip build if target is not supported
+        # set SKIP environment variable if the matrix.target is not supported by matrix.esp-idf-version
+        # as GitHub Action does not support early-exit.
+        # see https://github.com/orgs/community/discussions/82744
+        #
+        # note that all the steps below should have `if: ${{ env.SKIP != 'yes' }}`
         run: |
           if idf.py --list-targets | grep -q "${{ matrix.target }}"; then
             echo "target ${{ matrix.target }} is supported"
@@ -61,7 +71,7 @@ jobs:
             echo SKIP=yes >> "${GITHUB_ENV}"
           fi
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: ${{ env.SKIP != 'yes' }}
         with:
           submodules: recursive
