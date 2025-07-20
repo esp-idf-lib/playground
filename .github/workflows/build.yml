@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: yaml_to_json_string
     strategy:
+      fail-fast: false
       matrix:
         target: ${{ fromJSON(needs.yaml_to_json_string.outputs.result).targets }}
         esp_idf_version:
