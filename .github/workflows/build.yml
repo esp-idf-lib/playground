@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install missing packages
+        run: |
+          sudo apt-get install libsdl2-dev
+
       - uses: actions/checkout@v4
 
       - name: Install ESP-IDF
