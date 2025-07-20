@@ -1,13 +1,8 @@
 ---
 name: build examples
 on:
-  workflow_dispatch:
-  push:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+  workflow_call:
+
 jobs:
   target:
     runs-on: ubuntu-latest
@@ -45,6 +40,20 @@ jobs:
           - latest
 
     container:
+      # use docker container. faster. proven to work. 7m 55s, as of this
+      # writing, to finish building two almost empty projects.
+      #
+      # https://hub.docker.com/r/espressif/idf
+      #
+      # Other alternatives:
+      #
+      # install-esp-idf-action; Slow. Broken.
+      # https://github.com/espressif/install-esp-idf-action
+      #
+      # build-esp-idf-projects-action: Slow. Does not support multiple paths
+      # (matrix is required to build multiple examples). Does not support
+      # arbitrary command execution.
+      # https://github.com/espressif/build-esp-idf-projects-action
       image: espressif/idf:${{ matrix.esp-idf-version }}
       env:
         IDF_CLONE_SHALLOW: 1
@@ -62,7 +71,7 @@ jobs:
         # as GitHub Action does not support early-exit.
         # see https://github.com/orgs/community/discussions/82744
         #
-        # note that all the steps below should have `if: ${{ env.SKIP != 'yes' }}`
+        # note that all the steps below this step should have `if: ${{ env.SKIP != 'yes' }}`
         run: |
           if idf.py --list-targets | grep -q "${{ matrix.target }}"; then
             echo "target ${{ matrix.target }} is supported"
