@@ -23,11 +23,8 @@ jobs:
       - name: source export.sh
         run: |
           . ${IDF_PATH}/export.sh
-          env >> ${GITHUB_ENV}
+          env | grep -e '^IDF_' >> ${GITHUB_ENV}
       - name: Build examples
         shell: bash
         run: |
-          # . ${IDF_PATH}/export.sh
-          # pip install idf-component-manager ruamel.yaml idf-build-apps --upgrade
-          env | sort
           cd examples/hello_world && idf.py build
