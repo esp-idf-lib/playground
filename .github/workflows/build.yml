@@ -63,5 +63,5 @@ jobs:
         run: |
           EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
           for EXAMPLE in ${EXAMPLES}; do
-            (cd "${EXAMPLE}" && idf.py build)
+            (cd "${EXAMPLE}" && idf.py set-target ${{ matrix.target }} && idf.py build)
           done
