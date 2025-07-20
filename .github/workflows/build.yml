@@ -27,7 +27,7 @@ jobs:
         run: |
           EXAMPLES=`find examples -type d -maxdepth 1 -mindepth 1 | tr '\n' ' '`
           # ruby -e "require 'json'; puts \"result=#{ARGV.to_json}\"" ${EXAMPLES} >> $GITHUB_OUTPUT
-          echo "${EXAMPLES}" >> $GITHUB_OUTPUT
+          echo "result=${EXAMPLES}" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
